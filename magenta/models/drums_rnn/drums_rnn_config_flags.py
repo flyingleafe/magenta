@@ -21,7 +21,7 @@ FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_string(
     'config',
     'drum_kit',
-    "Which config to use. Must be one of 'one_drum' or 'drum_kit'.")
+    "Which config to use. Must be one of 'one_drum', 'drum_kit' or 'reduced_drum_kit'.")
 tf.app.flags.DEFINE_string(
     'generator_id',
     None,

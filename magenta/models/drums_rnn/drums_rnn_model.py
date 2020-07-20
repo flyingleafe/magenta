@@ -60,6 +60,25 @@ class DrumsRnnModel(events_rnn_model.EventSequenceRnnModel):
     return self._evaluate_log_likelihood([drums])[0]
 
 
+REDUCED_DRUM_TYPE_PITCHES = [
+    # kick drum
+    [36, 35],
+
+    # snare drum
+    [38, 27, 28, 31, 32, 33, 34, 37, 39, 40, 56, 65, 66, 75, 85,
+     45, 29, 41, 43, 61, 64, 84,    # low tom
+     48, 47, 60, 63, 77, 86, 87,    # mid tom
+     50, 30, 62, 76, 83],           # high tom
+
+    # closed hi-hat
+    [42, 44, 54, 68, 69, 70, 71, 73, 78, 80, 22],
+
+    # open hi-hat
+    [46, 67, 72, 74, 79, 81, 26,
+     49, 52, 55, 57, 58,             # crash
+     51, 53, 59, 82],                # ride
+]
+
 # Default configurations.
 default_configs = {
     'one_drum':
@@ -87,6 +106,23 @@ default_configs = {
             note_seq.LookbackEventSequenceEncoderDecoder(
                 note_seq.MultiDrumOneHotEncoding(),
                 lookback_distances=[],
+                binary_counter_bits=6),
+            contrib_training.HParams(
+                batch_size=128,
+                rnn_layer_sizes=[256, 256, 256],
+                dropout_keep_prob=0.5,
+                attn_length=32,
+                clip_norm=3,
+                learning_rate=0.001)),
+    'reduced_drum_kit':
+         events_rnn_model.EventSequenceRnnConfig(
+            generator_pb2.GeneratorDetails(
+                id='reduced_drum_kit',
+                description='Drums RNN without toms, rides and crashes (toms reinterpreted as snares, rides/crashes - as open hats).'
+            ),
+            note_seq.LookbackEventSequenceEncoderDecoder(
+                note_seq.MultiDrumOneHotEncoding(REDUCED_DRUM_TYPE_PITCHES),
+                lookback_distances=[],    # TODO: try lookback?
                 binary_counter_bits=6),
             contrib_training.HParams(
                 batch_size=128,
